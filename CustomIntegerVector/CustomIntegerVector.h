@@ -4,6 +4,9 @@
 #include <iostream>
 #include <cassert>
 
+#include <mutex>
+#include <thread>
+
 class CustomIntegerVector final
 {
 public:
@@ -36,4 +39,6 @@ private:
 	int m_capacity = 1;
 
 	int* m_array = nullptr;
+	
+	std::mutex m_mutex;
 };

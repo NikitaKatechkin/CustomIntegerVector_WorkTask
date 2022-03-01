@@ -28,6 +28,7 @@ int CustomIntegerVector::Back()
 	return m_array[m_size - 1];
 }
 
+//Inderect usage of Insert()
 void CustomIntegerVector::PushBack(const int& value)
 {
 	/**
@@ -40,6 +41,7 @@ void CustomIntegerVector::PushBack(const int& value)
 	Insert(m_size, value);
 }
 
+//Inderect usage of Erase()
 void CustomIntegerVector::PopBack()
 {
 	/**
@@ -51,6 +53,7 @@ void CustomIntegerVector::PopBack()
 	Erase(m_size);
 }
 
+//Inderect usage of Insert()
 void CustomIntegerVector::PushFront(const int& value)
 {
 	/**
@@ -68,6 +71,7 @@ void CustomIntegerVector::PushFront(const int& value)
 	Insert(0, value);
 }
 
+//Inderect usage of Erase()
 void CustomIntegerVector::PopFront()
 {
 	/**
@@ -83,12 +87,15 @@ void CustomIntegerVector::PopFront()
 	Erase(0);
 }
 
+//Critical section function
 void CustomIntegerVector::Insert(const int& insert_index, const int& value)
 {
 	assert(insert_index <= m_size);
 	assert(insert_index >= 0);
 
 	IncreaseCapacity();
+
+	m_mutex.lock();
 
 	for (int index = m_size; index > insert_index; index--)
 	{
@@ -97,8 +104,11 @@ void CustomIntegerVector::Insert(const int& insert_index, const int& value)
 
 	m_array[insert_index] = value;
 	m_size++;
+
+	m_mutex.unlock();
 }
 
+//Critical section function
 void CustomIntegerVector::Erase(const int& insert_index)
 {
 	assert(m_size >= 1);
@@ -106,14 +116,20 @@ void CustomIntegerVector::Erase(const int& insert_index)
 	assert(insert_index <= m_size);
 	assert(insert_index >= 0);
 
+	m_mutex.lock();
+
 	--m_size;
 	for (int index = insert_index; index < m_size; ++index)
 	{
 		m_array[index] = m_array[index + 1];
 	}
+
+	m_mutex.unlock();
+
 	Shrink();
 }
 
+//Critical section function
 void CustomIntegerVector::Clear()
 {
 	/**
@@ -122,12 +138,16 @@ void CustomIntegerVector::Clear()
 		PopBack();
 	}
 	**/
+	m_mutex.lock();
+
 	delete[] m_array;
 
 	m_capacity = 1;
 	m_size = 0;
 
 	m_array = new int[m_capacity] { 0 };
+
+	m_mutex.unlock();
 }
 
 int& CustomIntegerVector::operator[](const int& index)
@@ -149,10 +169,12 @@ const int& CustomIntegerVector::GetCapacity()
 	return m_capacity;
 }
 
+//Critical section function
 void CustomIntegerVector::IncreaseCapacity()
 {
 	if (m_size >= m_capacity)
 	{
+		m_mutex.lock();
 
 		m_capacity *= 2;
 
@@ -163,13 +185,18 @@ void CustomIntegerVector::IncreaseCapacity()
 
 		delete[] m_array;
 		m_array = tmp_array;
+
+		m_mutex.unlock();
 	}
 }
 
+//Critical section function
 void CustomIntegerVector::Shrink(int padding)
 {
 	if (m_capacity > (m_size * 2 + padding))
 	{
+		m_mutex.lock();
+
 		m_capacity = (m_size + padding);
 
 		int* tmp_array = new int[m_capacity]{ 0 };
@@ -177,5 +204,7 @@ void CustomIntegerVector::Shrink(int padding)
 
 		delete[] m_array;
 		m_array = tmp_array;
+
+		m_mutex.unlock();
 	}
 }
