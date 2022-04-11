@@ -6,212 +6,342 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
-namespace CustomIntegerVectorTests
+
+TEST(CustomIntegerVectorTest, InitializationTest)
 {
-    TEST(CustomIntegerVectorTest, InitializationTest)
-    {
-        CustomIntegerVector test_vector;
+    CustomIntegerVector test_vector;
 
-        EXPECT_EQ(1, test_vector.GetCapacity());
-        EXPECT_EQ(0, test_vector.GetSize());
-        
-        ASSERT_DEATH({ test_vector.Front(); }, "");
-        ASSERT_DEATH({ test_vector.Back(); }, "");
+    EXPECT_EQ(1, test_vector.GetCapacity());
+    EXPECT_EQ(0, test_vector.GetSize());
+
+    CustomIntegerVector test_vector_1({1, 2, 3 ,4});
+
+    EXPECT_EQ(4, test_vector_1.GetCapacity());
+    EXPECT_EQ(4, test_vector_1.GetSize());
+    EXPECT_EQ(test_vector_1, CustomIntegerVector({ 1, 2, 3 ,4 }));
+
+    CustomIntegerVector test_vector_2(test_vector_1);
+
+    EXPECT_EQ(4, test_vector_2.GetCapacity());
+    EXPECT_EQ(4, test_vector_2.GetSize());
+    EXPECT_EQ(test_vector_2, CustomIntegerVector({ 1, 2, 3 ,4 }));
+
+    EXPECT_EQ(test_vector_2, test_vector_1);
+}
+
+TEST(CustomIntegerVectorTest, BackTest)
+{
+    CustomIntegerVector test_vector;
+
+    try
+    {
+        test_vector.Back();
+        FAIL() << "Back() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), 
+                  "Access to the back element of an empty vector exception.");
     }
 
-    TEST(CustomIntegerVectorTest, CapacityIncreaseTest)
-    {
-        CustomIntegerVector test_vector;
-
-        test_vector.PushBack(1);
-
-        EXPECT_EQ(1, test_vector.GetCapacity());
-        EXPECT_EQ(1, test_vector.GetSize());
-
-        test_vector.PushBack(2);
-
-        EXPECT_EQ(2, test_vector.GetCapacity());
-        EXPECT_EQ(2, test_vector.GetSize());
-
-        test_vector.PushBack(3);
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(3, test_vector.GetSize());
-    }
-
-    TEST(CustomIntegerVectorTest, SizeDecreaseTest)
-    {
-        CustomIntegerVector test_vector;
-
-        test_vector.PushBack(1);
-        test_vector.PushBack(2);
-        test_vector.PushBack(3);
-
-        test_vector.PopBack();
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(2, test_vector.GetSize());
-
-        EXPECT_EQ(1, test_vector.Front());
-        EXPECT_EQ(2, test_vector.Back());
-
-        test_vector.PopBack();
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(1, test_vector.GetSize());
-
-        EXPECT_EQ(1, test_vector.Front());
-        EXPECT_EQ(1, test_vector.Back());
-
-        test_vector.PopBack();
-
-        EXPECT_EQ(2, test_vector.GetCapacity());
-        EXPECT_EQ(0, test_vector.GetSize());
-
-        ASSERT_DEATH({ test_vector.Front(); }, "");
-        ASSERT_DEATH({ test_vector.Back(); }, "");
-    }
+    test_vector = CustomIntegerVector({ 1, 2, 3 });
     
-    TEST(CustomIntegerVectorTest, PushFrontTest)
+    EXPECT_EQ(test_vector.Back(), 3);
+}
+
+TEST(CustomIntegerVectorTest, FrontTest)
+{
+    CustomIntegerVector test_vector;
+
+    try
     {
-        CustomIntegerVector test_vector;
-
-        test_vector.PushFront(1);
-
-        EXPECT_EQ(1, test_vector.GetCapacity());
-        EXPECT_EQ(1, test_vector.GetSize());
-
-        test_vector.PushFront(2);
-
-        EXPECT_EQ(2, test_vector.GetCapacity());
-        EXPECT_EQ(2, test_vector.GetSize());
-
-        test_vector.PushFront(3);
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(3, test_vector.GetSize());
+        test_vector.Front();
+        FAIL() << "Back() should be failed.";
     }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()),
+            "Access to the front element of an empty vector exception.");
+    }
+
+    test_vector = CustomIntegerVector({ 1, 2, 3 });
+
+    EXPECT_EQ(test_vector.Front(), 1);
+}
+
+TEST(CustomIntegerVectorTest, PushBackTest)
+{
+    CustomIntegerVector test_vector;
+
+    test_vector.PushBack(1);
+
+    EXPECT_EQ(1, test_vector.GetCapacity());
+    EXPECT_EQ(1, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({1}));
+
+    test_vector.PushBack(2);
+
+    EXPECT_EQ(2, test_vector.GetCapacity());
+    EXPECT_EQ(2, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1, 2 }));
+
+    test_vector.PushBack(3);
+
+    EXPECT_EQ(4, test_vector.GetCapacity());
+    EXPECT_EQ(3, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1, 2, 3 }));
+}
+
+TEST(CustomIntegerVectorTest, PushFrontTest)
+{
+    CustomIntegerVector test_vector;
+
+    test_vector.PushFront(1);
+
+    EXPECT_EQ(1, test_vector.GetCapacity());
+    EXPECT_EQ(1, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1 }));
+
+    test_vector.PushFront(2);
+
+    EXPECT_EQ(2, test_vector.GetCapacity());
+    EXPECT_EQ(2, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 2, 1 }));
+
+    test_vector.PushFront(3);
+
+    EXPECT_EQ(4, test_vector.GetCapacity());
+    EXPECT_EQ(3, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 3, 2, 1 }));
+}
+
+TEST(CustomIntegerVectorTest, PopBackTest)
+{
+    CustomIntegerVector test_vector;
+
+    try
+    {
+        test_vector.PopBack();
+        FAIL() << "PopBack() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Erasing of an empty vector exception.");
+    }
+
+    test_vector = CustomIntegerVector({1, 2, 3});
+
+    test_vector.PopBack();
+
+    EXPECT_EQ(3, test_vector.GetCapacity());
+    EXPECT_EQ(2, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1, 2 }));
+
+    test_vector.PopBack();
+
+    EXPECT_EQ(3, test_vector.GetCapacity());
+    EXPECT_EQ(1, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1 }));
+
+    test_vector.PopBack();
+
+    try
+    {
+        test_vector.PopBack();
+        FAIL() << "PopBack() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Erasing of an empty vector exception.");
+    }
+}
     
-    TEST(CustomIntegerVectorTest, PopFrontTest)
+TEST(CustomIntegerVectorTest, PopFrontTest)
+{
+    CustomIntegerVector test_vector;
+
+    try
     {
-        CustomIntegerVector test_vector;
-
-        test_vector.PushBack(1);
-        test_vector.PushBack(2);
-        test_vector.PushBack(3);
-
         test_vector.PopFront();
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(2, test_vector.GetSize());
-
-        EXPECT_EQ(2, test_vector.Front());
-        EXPECT_EQ(3, test_vector.Back());
-
-        test_vector.PopFront();
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(1, test_vector.GetSize());
-
-        EXPECT_EQ(3, test_vector.Front());
-        EXPECT_EQ(3, test_vector.Back());
-
-        test_vector.PopFront();
-
-        EXPECT_EQ(2, test_vector.GetCapacity());
-        EXPECT_EQ(0, test_vector.GetSize());
-
-        ASSERT_DEATH({ test_vector.Front(); }, "");
-        ASSERT_DEATH({ test_vector.Back(); }, "");
+        FAIL() << "PopBack() should be failed.";
     }
-    
-    TEST(CustomIntegerVectorTest, ClearTest)
+    catch (const std::exception& e)
     {
-        CustomIntegerVector test_vector;
-
-        test_vector.PushFront(1);
-        test_vector.PushFront(2);
-        test_vector.PushFront(3);
-
-        ASSERT_NO_THROW({ test_vector.Clear(); }, "");
-
-        EXPECT_EQ(1, test_vector.GetCapacity());
-        EXPECT_EQ(0, test_vector.GetSize());
-
-        ASSERT_DEATH({ test_vector.Front(); }, "");
-        ASSERT_DEATH({ test_vector.Back(); }, "");
-
-        ASSERT_NO_THROW({ test_vector.Clear(); }, "");
-
-        EXPECT_EQ(1, test_vector.GetCapacity());
-        EXPECT_EQ(0, test_vector.GetSize());
-
-        ASSERT_DEATH({ test_vector.Front(); }, "");
-        ASSERT_DEATH({ test_vector.Back(); }, "");
+        EXPECT_EQ(std::string(e.what()), "Erasing of an empty vector exception.");
     }
 
-    TEST(CustomIntegerVectorTest, InsertTest)
+    test_vector = CustomIntegerVector({ 1, 2, 3 });
+
+    test_vector.PopFront();
+
+    EXPECT_EQ(3, test_vector.GetCapacity());
+    EXPECT_EQ(2, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 2, 3 }));
+
+    test_vector.PopFront();
+
+    EXPECT_EQ(3, test_vector.GetCapacity());
+    EXPECT_EQ(1, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 3 }));
+
+    test_vector.PopFront();
+
+    try
     {
-        CustomIntegerVector test_vector;
+        test_vector.PopFront();
+        FAIL() << "PopBack() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Erasing of an empty vector exception.");
+    }
+}
 
-        test_vector.Insert(0, 1);
+TEST(CustomIntegerVectorTest, InsertTest)
+{
+    CustomIntegerVector test_vector;
 
-        EXPECT_EQ(1, test_vector.GetCapacity());
-        EXPECT_EQ(1, test_vector.GetSize());
-
-        EXPECT_EQ(1, test_vector.Front());
-        EXPECT_EQ(1, test_vector.Back());
-
-        test_vector.Insert(1, 2);
-
-        EXPECT_EQ(2, test_vector.GetCapacity());
-        EXPECT_EQ(2, test_vector.GetSize());
-
-        EXPECT_EQ(1, test_vector.Front());
-        EXPECT_EQ(2, test_vector.Back());
-
-        test_vector.Insert(1, 3);
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(3, test_vector.GetSize());
-
-        EXPECT_EQ(1, test_vector.Front());
-        EXPECT_EQ(2, test_vector.Back());
+    try
+    {
+        test_vector.Insert(1, 0);
+        FAIL() << "Insert() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Out of bounds insertion index exception.");
     }
 
-    TEST(CustomIntegerVectorTest, EraseTest)
+    test_vector.Insert(0, 1);
+
+    EXPECT_EQ(1, test_vector.GetCapacity());
+    EXPECT_EQ(1, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1 }));
+
+    test_vector.Insert(test_vector.GetSize(), 2);
+
+    EXPECT_EQ(2, test_vector.GetCapacity());
+    EXPECT_EQ(2, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1, 2 }));
+
+    test_vector.Insert(test_vector.GetSize() - 1, 3);
+
+    EXPECT_EQ(4, test_vector.GetCapacity());
+    EXPECT_EQ(3, test_vector.GetSize());
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 1, 3, 2 }));
+
+    try
     {
-        CustomIntegerVector test_vector;
+        test_vector.Insert(test_vector.GetSize() + 1, 0);
+        FAIL() << "Insert() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Out of bounds insertion index exception.");
+    }
+}
 
-        test_vector.Insert(0, 1);
+TEST(CustomIntegerVectorTest, EraseTest)
+{
+    CustomIntegerVector test_vector;
 
-        test_vector.Insert(1, 2);
-
-        test_vector.Insert(1, 3);
-
-        test_vector.Erase(1);
-
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(2, test_vector.GetSize());
-
-        EXPECT_EQ(1, test_vector.Front());
-        EXPECT_EQ(2, test_vector.Back());
-
+    try
+    {
         test_vector.Erase(0);
+        FAIL() << "Erase() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Erasing of an empty vector exception.");
+    }
 
-        EXPECT_EQ(4, test_vector.GetCapacity());
-        EXPECT_EQ(1, test_vector.GetSize());
+    test_vector = CustomIntegerVector({ 1, 2, 3, 4 });
 
-        EXPECT_EQ(2, test_vector.Front());
-        EXPECT_EQ(2, test_vector.Back());
+    test_vector.Erase(0);
 
+    EXPECT_EQ(4, test_vector.GetCapacity());
+    EXPECT_EQ(3, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 2, 3, 4 }));
+
+    test_vector.Erase(test_vector.GetSize() - 2);
+
+    EXPECT_EQ(4, test_vector.GetCapacity());
+    EXPECT_EQ(2, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 2, 4 }));
+
+    test_vector.Erase(test_vector.GetSize() - 1);
+
+    EXPECT_EQ(4, test_vector.GetCapacity());
+    EXPECT_EQ(1, test_vector.GetSize());
+
+    EXPECT_EQ(test_vector, CustomIntegerVector({ 2 }));
+
+    try
+    {
         test_vector.Erase(test_vector.GetSize());
+        FAIL() << "Erase() should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Out of bounds erasing index exception.");
+    }
 
-        EXPECT_EQ(2, test_vector.GetCapacity());
-        EXPECT_EQ(0, test_vector.GetSize());
+    test_vector.Erase(test_vector.GetSize() - 1);
 
-        ASSERT_DEATH({ test_vector.Front(); }, "");
-        ASSERT_DEATH({ test_vector.Back(); }, "");
+    EXPECT_EQ(2, test_vector.GetCapacity());
+    EXPECT_EQ(0, test_vector.GetSize());
 
+    EXPECT_EQ(test_vector, CustomIntegerVector({ }));
+}
+
+TEST(CustomIntegerVectorTest, ClearTest)
+{
+    CustomIntegerVector test_vector;
+
+    test_vector.Clear();
+
+    test_vector = CustomIntegerVector({ 1, 2, 3 });
+
+    test_vector.Clear();
+
+    EXPECT_EQ(1, test_vector.GetCapacity());
+    EXPECT_EQ(0, test_vector.GetSize());
+
+    test_vector.Clear();
+}
+
+TEST(CustomIntegerVectorTest, AccessToElementTest)
+{
+    CustomIntegerVector test_vector;
+
+    try
+    {
+        test_vector[0];
+        FAIL() << "[] should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Out of bounds access index exception.");
+    }
+
+    test_vector = CustomIntegerVector({ 1, 2, 3, 4 });
+
+    test_vector[0];
+    test_vector[test_vector.GetSize() - 1];
+    test_vector[test_vector.GetSize() - 2];
+
+    try
+    {
+        test_vector[test_vector.GetSize()];
+        FAIL() << "[] should be failed.";
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(std::string(e.what()), "Out of bounds access index exception.");
     }
 }

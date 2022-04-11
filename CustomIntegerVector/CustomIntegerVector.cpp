@@ -1,12 +1,38 @@
 #include "CustomIntegerVector.h"
 
-CustomIntegerVector::CustomIntegerVector(int l_capacity):
+//Use assert
+CustomIntegerVector::CustomIntegerVector(unsigned int l_capacity):
 	m_capacity(l_capacity), m_size(0)
 {
-	assert(l_capacity > 0);
-
 	m_array = new int[l_capacity];
 	memset(m_array, 0, sizeof(int) * m_capacity);
+}
+
+CustomIntegerVector::CustomIntegerVector(const CustomIntegerVector& l_copy):
+	CustomIntegerVector(l_copy.m_size)
+{
+	this->m_size = l_copy.m_size;
+
+	memcpy(m_array, l_copy.m_array, l_copy.m_size * sizeof(int));
+	/**
+	for (unsigned int index = 0; index < l_copy.m_size; index++)
+	{
+		m_array[index] = l_copy[index];
+	}
+	**/
+}
+
+CustomIntegerVector::CustomIntegerVector(std::initializer_list<int> l_init_list):
+	CustomIntegerVector(static_cast<unsigned int>(l_init_list.size()))
+{
+	this->m_size = static_cast<unsigned int>(l_init_list.size());
+
+	unsigned int index = 0;
+	for (const auto& element : l_init_list)
+	{
+		this->m_array[index] = element;
+		index++;
+	}
 }
 
 CustomIntegerVector::~CustomIntegerVector()
@@ -14,90 +40,67 @@ CustomIntegerVector::~CustomIntegerVector()
 	delete[] m_array;
 }
 
+//Use assert
 int CustomIntegerVector::Front()
 {
-	assert(m_size >= 1);
+	if (m_size < 1)
+	{
+		throw std::exception("Access to the front element of an empty vector exception.");
+	}
 
 	return m_array[0];
 }
 
+//Use assert
 int CustomIntegerVector::Back()
 {
-	assert(m_size >= 1);
+	if (m_size < 1)
+	{
+		throw std::exception("Access to the back element of an empty vector exception.");
+	}
 
 	return m_array[m_size - 1];
 }
 
 //Inderect usage of Insert()
-void CustomIntegerVector::PushBack(const int& value)
+void CustomIntegerVector::PushBack(const int value)
 {
-	/**
-	IncreaseCapacity();
-	
-	m_array[m_size] = value;
-	m_size++;
-	**/
-
 	Insert(m_size, value);
 }
 
 //Inderect usage of Erase()
 void CustomIntegerVector::PopBack()
 {
-	/**
-	assert(m_size >= 1);
-
-	--m_size;
-	Shrink();
-	**/
-	Erase(m_size);
+	Erase(m_size - 1);
 }
 
 //Inderect usage of Insert()
-void CustomIntegerVector::PushFront(const int& value)
+void CustomIntegerVector::PushFront(const int value)
 {
-	/**
-	IncreaseCapacity();
-	
-	for (int index = m_size; index > 0; index--)
-	{
-		m_array[index] = m_array[index - 1];
-	}
-	m_size++;
-
-	m_array[0] = value;
-	**/
-
 	Insert(0, value);
 }
 
 //Inderect usage of Erase()
 void CustomIntegerVector::PopFront()
 {
-	/**
-	assert(m_size >= 1);
-
-	--m_size;
-	for (int index = 0; index < m_size; ++index)
-	{
-		m_array[index] = m_array[index + 1];
-	}
-	Shrink();
-	**/
 	Erase(0);
 }
 
 //Critical section function
-void CustomIntegerVector::Insert(const int& insert_index, const int& value)
+//Use assert
+void CustomIntegerVector::Insert(const unsigned int insert_index, const int value)
 {
-	assert(insert_index <= m_size);
-	assert(insert_index >= 0);
+	if (insert_index > m_size)
+	{
+		throw std::exception("Out of bounds insertion index exception.");
+	}
+	//assert(insert_index >= 0);
 
 	IncreaseCapacity();
 
 	m_mutex.lock();
 
-	for (int index = m_size; index > insert_index; index--)
+	for (unsigned int index = m_size; index > insert_index; index--)
 	{
 		m_array[index] = m_array[index - 1];
 	}
@@ -109,17 +112,25 @@ void CustomIntegerVector::Insert(const int& insert_index, const int& value)
 }
 
 //Critical section function
-void CustomIntegerVector::Erase(const int& insert_index)
+//Use assert
+void CustomIntegerVector::Erase(const unsigned int insert_index)
 {
-	assert(m_size >= 1);
+	//assert(m_size >= 1);
+	if (m_size < 1)
+	{
+		throw std::exception("Erasing of an empty vector exception.");
+	}
 
-	assert(insert_index <= m_size);
-	assert(insert_index >= 0);
+	if (insert_index >= m_size)
+	{
+		throw std::exception("Out of bounds erasing index exception.");
+	}
+	//assert(insert_index >= 0);
 
 	m_mutex.lock();
 
 	--m_size;
-	for (int index = insert_index; index < m_size; ++index)
+	for (unsigned int index = insert_index; index < m_size; ++index)
 	{
 		m_array[index] = m_array[index + 1];
 	}
@@ -132,12 +143,6 @@ void CustomIntegerVector::Erase(const int& insert_index)
 //Critical section function
 void CustomIntegerVector::Clear()
 {
-	/**
-	while (m_size > 0)
-	{
-		PopBack();
-	}
-	**/
 	m_mutex.lock();
 
 	delete[] m_array;
@@ -150,21 +155,37 @@ void CustomIntegerVector::Clear()
 	m_mutex.unlock();
 }
 
-int& CustomIntegerVector::operator[](const int& index)
+//Use assert
+int CustomIntegerVector::operator[](const unsigned int index) const
 {	
 
-	assert(index < m_size);
-	assert(index >= 0);
+	if (index >= m_size)
+	{
+		throw std::exception("Out of bounds access index exception.");
+	}
+	//assert(index >= 0);
 
 	return m_array[index];
 }
 
-const int& CustomIntegerVector::GetSize()
+void CustomIntegerVector::operator=(const CustomIntegerVector& l_copy)
+{
+	this->Clear();
+	delete[] m_array;
+
+	this->m_capacity = l_copy.m_size;
+	this->m_size = l_copy.m_size;
+
+	m_array = new int[m_capacity];
+	memcpy(m_array, l_copy.m_array, sizeof(int) * l_copy.m_size);
+}
+
+unsigned int CustomIntegerVector::GetSize()
 {
 	return m_size;
 }
 
-const int& CustomIntegerVector::GetCapacity()
+unsigned int CustomIntegerVector::GetCapacity()
 {
 	return m_capacity;
 }
@@ -207,4 +228,26 @@ void CustomIntegerVector::Shrink(int padding)
 
 		m_mutex.unlock();
 	}
+}
+
+bool operator==(const CustomIntegerVector& l_left_operand, const CustomIntegerVector& l_right_operand)
+{
+	/**
+	if (l_left_operand.m_size != l_right_operand.m_size)
+	{
+		return false;
+	}
+
+	for (unsigned int index = 0; index < l_left_operand.m_size; index++)
+	{
+		if (l_left_operand.m_array[index] != l_right_operand.m_array[index])
+		{
+			return false;
+		}
+	}
+
+
+	return true;
+	**/
+	return memcmp(l_left_operand.m_array, l_right_operand.m_array, l_left_operand.m_size * sizeof(int)) == 0 ? true : false ;
 }
